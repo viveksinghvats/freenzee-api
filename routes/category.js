@@ -5,3 +5,5 @@ var router = express.Router();
 // params
 
 router.param('userId', getUserById);
+
+module.exports = router;

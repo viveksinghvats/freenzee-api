@@ -11,16 +11,12 @@ const categorySchema = new mongoose.Schema({
     required: false,
     trim: true
   },
-  shopId:{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Shop',
-    required: true
-  },
+  // will define parent category concept here
   images: [{
-      type: String,
-      required: false
-    }
+    type: String,
+    required: false
+  }
   ]
-});
+}, { timestamps: true });
 
 module.exports = mongoose.model('Category', categorySchema);

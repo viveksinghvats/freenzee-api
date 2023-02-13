@@ -3,9 +3,9 @@ const shopSchema = new mongoose.Schema({
     shopName: {
         type: String,
         required: true,
-        trim: true
+        trim: true,
     },
-    shopId: {    // Admin defined Unique shopId
+    shopNameId: {    // Admin defined Unique shopId
         type: String,
         required: true,
         index: true,
@@ -15,35 +15,35 @@ const shopSchema = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: true
+        required: true,
     },
     shopHeaderAddress: {
         type: String,
         require: true,
-        trim: true
+        trim: true,
     },
     shopFullAddress: {
         type: String,
         required: false,
-        trim: false
+        trim: false,
     },
     contact: [{
         type: String,
-        required: true
+        required: true,
     }
     ],
     gstin: {
         type: String,
-        required: false
+        required: false,
     },
     shopMainLogo: {
         type: String,
-        required: false
+        required: false,
     },
     isShopEnable: {
         type: Boolean,
-        default: true
+        default: true,
     }
-});
+}, { timestamps: true });
 
 module.exports = mongoose.model('Shop', shopSchema);

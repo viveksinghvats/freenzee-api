@@ -9,21 +9,16 @@ const productSchema = new mongoose.Schema({
     type: String,
     required: false
   },
-  image: [{
+  images: [{
       type: String,
       required: false
     }
   ],
-  shopId:{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Shop',
-    required: true
-  },
   categoryId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Category',
     required: true
   }
-});
+},  { timestamps: true });
 
 module.exports = mongoose.model('Product', productSchema);

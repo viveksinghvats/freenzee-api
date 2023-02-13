@@ -22,14 +22,6 @@ router.post(
     authController.signin
 );
 
-router.post(
-    "/category",
-    authController.isSignedIn,
-    authController.isAuthenticated,
-    authController.isAdmin,
-    authController.signin
-  );
-
 router.get("/signout", authController.signout);
 
 module.exports = router;
