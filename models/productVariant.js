@@ -10,7 +10,6 @@ const productVariantSchema = new mongoose.Schema({
       required: false
     }
   ],
-  // Wii define parent category concept here
   productId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Product',

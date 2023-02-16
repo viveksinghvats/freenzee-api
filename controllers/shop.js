@@ -58,7 +58,6 @@ exports.createShop = (req, res) => {
 
 exports.updateShop = async (req, res) => {
   try {
-    const { shopId } = req.body;
     const { error } = validateShopUpdateBody(req.body);
     if (error) {
       return res.status(httpConstants.BAD_REQUEST_400).send({
@@ -66,7 +65,7 @@ exports.updateShop = async (req, res) => {
         message: error.message
       });
     }
-    const shop = await Shop.findById(shopId);
+    const shop = req.shop;
     shop.shopName = req.body.shopName; 
     shop.shopNameId = req.body.shopNameId;
     if (req.profile.role == 'admin') {

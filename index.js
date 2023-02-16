@@ -29,6 +29,7 @@ app.use(cors());
 app.use("/api/auth", routes.authRoutes);
 app.use('/api/shop', routes.shopRoutes);
 app.use('/api/category', routes.categoryRoutes);
+app.use('/api/product', routes.productRoutes);
 
 //PORT
 const port = process.env.PORT || 8000;

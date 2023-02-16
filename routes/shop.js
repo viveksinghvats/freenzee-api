@@ -1,18 +1,16 @@
 const express = require("express");
-const { isSignedIn, isAdmin, isCorrectUserIdPassed } = require("../controllers/auth");
-const { getShopById, createShop, updateShop, canUpdateShop, disableShop } = require("../controllers/shop");
-const { getUserById } = require("../controllers/user");
+const { authController, userController, shopController } = require("../controllers/index");
 var router = express.Router();
 
 // router params
 
-router.param('userId', getUserById);
-router.param('shopId', getShopById);
+router.param('userId', userController.getUserById);
+router.param('shopId', shopController.getShopById);
 
 
-router.post('/create/:userId', isSignedIn, isCorrectUserIdPassed, isAdmin, createShop);
-router.put('/update/:userId', isSignedIn, isCorrectUserIdPassed, canUpdateShop, updateShop);
-router.delete('/disable/:shopId/:userId', isSignedIn, isCorrectUserIdPassed, isAdmin, disableShop);
+router.post('/create/:userId', authController.isSignedIn, authController.isCorrectUserIdPassed, authController.isAdmin, shopController.createShop);
+router.put('/update/:shopId/:userId', authController.isSignedIn, authController.isCorrectUserIdPassed, shopController.canUpdateShop, shopController.updateShop);
+router.delete('/disable/:shopId/:userId', authController.isSignedIn, authController.isCorrectUserIdPassed, authController.isAdmin, shopController.disableShop);
 
 
 module.exports = router;
