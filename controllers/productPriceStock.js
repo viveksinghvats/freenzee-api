@@ -1,6 +1,7 @@
 const { ProductPriceStock, Product, ProductVariant } = require("../models");
 const { productType } = require("../utils/constants");
-const { validateCreateProductBodyRequestForShop, validateCreateProductVariantBodyRequestForShop, validateProductPriceAvailabilityBodyRequestForShop } = require("./helper/productPriceStockHelper");
+const httpConstants = require('../utils/httpConstants');
+const { validateCreateProductBodyRequestForShop, validateCreateProductVariantBodyRequestForShop, validateProductPriceAvailabilityBodyRequestForShop, validateProductPriceStockUpdateBodyRequestForShop } = require("./helper/productPriceStockHelper");
 
 exports.isAuthenticatedToUpdateShopDetails = (req, res, next) => {
     if (req.profile.role != 'admin') {
@@ -29,6 +30,7 @@ exports.getProductPriceStockById = (req, res, next, id) => {
 exports.createNewProductForShop = (req, res) => {
     try {
         req.body.shopId = req.shop.id;
+        req.body.categoryId = req.category.id;
         const { error } = validateCreateProductBodyRequestForShop(req.body);
         if (error) {
             return res.status(httpConstants.BAD_REQUEST_400).send({
@@ -51,8 +53,10 @@ exports.createNewProductForShop = (req, res) => {
     }
 }
 
-exports.updateProductShop = (req, res) => {
+exports.updateProductForShop = (req, res) => {
     try {
+        req.body.shopId = req.shop.id;
+        req.body.categoryId = req.category.id;
         const { error } = validateCreateProductBodyRequestForShop(req.body);
         if (error) {
             return res.status(httpConstants.BAD_REQUEST_400).send({
@@ -79,9 +83,6 @@ exports.updateProductShop = (req, res) => {
         console.log(err);
     }
 }
-
-// exports.deleteProductShop = (req, res) => {
-// }
 
 exports.createNewProductVariantForShop = (req, res) => {
     try {
@@ -139,10 +140,11 @@ exports.updateProductVariantForShop = (req, res) => {
 exports.updateProductPriceAvailabilityForShop = async (req, res) => {
     try {
         req.body.productVariantId = req.productVariant.id;
-        req.body.productId = req.product.id;
-        req.body.categoryId = req.product.categoryId;
+        req.body.productId = req.productVariant.productId + '';
         req.body.shopId = req.shop.id;
         req.body.productType = productType.FOOD;
+        const product = await Product.findById(req.body.productId).exec();
+        req.body.categoryId = product.categoryId + '';
         const { error } = validateProductPriceAvailabilityBodyRequestForShop(req.body);
         if (error) {
             return res.status(httpConstants.BAD_REQUEST_400).send({
@@ -151,9 +153,8 @@ exports.updateProductPriceAvailabilityForShop = async (req, res) => {
             });
         }
         const productStock = await ProductPriceStock.findOne({
-            where: {
-                productVariantId: req.body.productVariantId
-            }
+            productVariantId: req.body.productVariantId,
+            productType: productType.FOOD
         });
         if (productStock) {
             productStock.productVariantId = req.body.productVariantId;
@@ -163,6 +164,7 @@ exports.updateProductPriceAvailabilityForShop = async (req, res) => {
             productStock.productType = req.body.productType;
             productStock.price = req.body.price;
             productStock.isProductEnable = req.body.isProductEnable;
+            productStock.productAvailable = req.body.productAvailable;
             productStock.save((err, updatedProductStock) => {
                 if (err) {
                     return res.status(httpConstants.BAD_REQUEST_400).json({
@@ -190,10 +192,11 @@ exports.updateProductPriceAvailabilityForShop = async (req, res) => {
 exports.updateProductStockDetails = async (req, res) => {
     try {
         req.body.productVariantId = req.productVariant.id;
-        req.body.productId = req.product.id;
-        req.body.categoryId = req.product.categoryId;
+        req.body.productId = req.productVariant.productId + '';
         req.body.shopId = req.shop.id;
         req.body.productType = productType.GROCERY;
+        const product = await Product.findById(req.body.productId).exec();
+        req.body.categoryId = product.categoryId + '';
         const { error } = validateProductPriceStockUpdateBodyRequestForShop(req.body);
         if (error) {
             return res.status(httpConstants.BAD_REQUEST_400).send({
@@ -202,9 +205,8 @@ exports.updateProductStockDetails = async (req, res) => {
             });
         }
         const productStock = await ProductPriceStock.findOne({
-            where: {
-                productVariantId: req.body.productVariantId
-            }
+            productVariantId: req.body.productVariantId,
+            productType: productType.GROCERY
         });
         if (productStock) {
             productStock.productVariantId = req.body.productVariantId;
@@ -218,17 +220,17 @@ exports.updateProductStockDetails = async (req, res) => {
             productStock.save((err, updatedProductStock) => {
                 if (err) {
                     return res.status(httpConstants.BAD_REQUEST_400).json({
-                        error: 'Not able to update product availability details'
+                        error: 'Not able to update product stock details'
                     });
                 }
                 res.status(httpConstants.OK_200).json({ updatedProductStock });
             });
         } else {
             const productStock = ProductPriceStock(req.body);
-            productStock.save((err, createdStock) => {
+            productStock.save((err, createdStock) => { 
                 if (err) {
                     return res.status(httpConstants.BAD_REQUEST_400).json({
-                        error: 'Not able to create product availability'
+                        error: 'Not able to update product stock details'
                     });
                 }
                 res.status(httpConstants.OK_200).json({ createdStock });

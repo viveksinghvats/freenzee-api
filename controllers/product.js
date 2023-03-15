@@ -1,5 +1,6 @@
 const { Product, ProductVariant } = require("../models");
 const { validateCreateProductVariantBodyRequest, validateCreateProductBodyRequest } = require("./helper/productHelper");
+const httpConstants = require('../utils/httpConstants');
 
 exports.getProductById = (req, res, next, id) => {
     Product.findById(id).exec((err, product) => {
@@ -115,6 +116,7 @@ exports.updateProductVariant = (req, res) => {
     const productVariant = req.productVariant;
     // assigning the productId into variant
     productVariant.productId = req.product.id;
+    productVariant.unit = req.body.unit;
     productVariant.save((err, productVariant) => {
         if (err) {
             return res.status(httpConstants.BAD_REQUEST_400).json({

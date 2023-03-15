@@ -1,5 +1,6 @@
 const { Category } = require("../models/");
-const { validateCreateCategoryBodyRequest } = require("./helper/categoryHelper")
+const { validateCreateCategoryBodyRequest } = require("./helper/categoryHelper");
+const httpConstants = require('../utils/httpConstants');
 
 exports.getCategoryById = (req, res, next, id) => {
     Category.findById(id).exec((err, category) => {

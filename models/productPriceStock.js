@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { productType } = require("../utils/constants");
 
 const productPriceStockSchema = mongoose.Schema({
     productVariantId: {
@@ -10,7 +11,7 @@ const productPriceStockSchema = mongoose.Schema({
     productId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product',
-        required: true,
+        required: true
     },
     categoryId: {
         type: mongoose.Schema.Types.ObjectId, 
@@ -20,7 +21,7 @@ const productPriceStockSchema = mongoose.Schema({
     shopId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Shop',
-        required: true,
+        required: true
     },
     productType: {
         type: String,
@@ -50,7 +51,7 @@ productPriceStockSchema
     .virtual("productAvailable")
     .set(function (productAvailable) {
         if (this.isProductEnable) {
-            if (this.productType == 'food') {
+            if (this.productType == productType.FOOD) {
                 this._isProductAvailable = productAvailable;
                 this.isProductAvailable = productAvailable;
             } else {
