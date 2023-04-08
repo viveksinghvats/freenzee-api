@@ -215,7 +215,7 @@ exports.updateProductStockDetails = async (req, res) => {
             productStock.shopId = req.body.shopId;
             productStock.productType = req.body.productType;
             productStock.price = req.body.price;
-            productStock.stock = req.body.stock;
+            productStock.newStock = req.body.newStock;
             productStock.isProductEnable = req.body.isProductEnable;
             productStock.save((err, updatedProductStock) => {
                 if (err) {
@@ -227,7 +227,7 @@ exports.updateProductStockDetails = async (req, res) => {
             });
         } else {
             const productStock = ProductPriceStock(req.body);
-            productStock.save((err, createdStock) => { 
+            productStock.save((err, createdStock) => {
                 if (err) {
                     return res.status(httpConstants.BAD_REQUEST_400).json({
                         error: 'Not able to update product stock details'
@@ -236,6 +236,43 @@ exports.updateProductStockDetails = async (req, res) => {
                 res.status(httpConstants.OK_200).json({ createdStock });
             })
         }
+    } catch (error) {
+        console.log(err);
+    }
+}
+
+exports.getAllProducts = async (req, res) => {
+    try {
+        const allProductsOfAShop = await ProductPriceStock.find({
+            isProductAvailable: true,
+            shopId: req.shop.id
+        }).populate('productVariantId').populate('productId').populate('categoryId').exec();
+        let groupedDetails = [];
+        let categoryProductIndexMap = new Map();
+        for(let i = 0; i < allProductsOfAShop.length; i++){
+            const temp = {};
+        //  if(categoryProductIndexMap.has(allProductsOfAShop[i].categoryId._id)){
+        //     const categoryId = allProductsOfAShop[i].categoryId._id;
+        //      let categoryObject = {
+        //         'categoryId': categoryId,
+        //         'categoryName': allProductsOfAShop[i].categoryId.name,
+        //         'products':[
+        //           {
+        //             'productId':allProductsOfAShop[i].productId._id,
+        //             'productName': allProductsOfAShop[i].productId.name,
+        //             'productVariant': [
+        //                 {
+        //                     'productVariantId':
+        //                     'unit': allProductsOfAShop[i].productVariantId.unit,
+
+        //                 }
+        //             ]
+        //           }
+        //         ]
+        //      }
+        //  }
+        }
+        res.status(httpConstants.OK_200).json({ allProductsOfAShop });
     } catch (error) {
         console.log(err);
     }

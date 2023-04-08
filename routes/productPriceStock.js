@@ -37,7 +37,7 @@ router.put('/productVariant/update/:productVariantId/:productId/:shopId/:userId'
 router.post('/update/availability/:productVariantId/:shopId/:userId', authController.isSignedIn, authController.isCorrectUserIdPassed, productPriceStockController.isAuthenticatedToUpdateShopDetails, productPriceStockController.updateProductPriceAvailabilityForShop);
 router.post('/update/stock/:productVariantId/:shopId/:userId', authController.isSignedIn, authController.isCorrectUserIdPassed, productPriceStockController.isAuthenticatedToUpdateShopDetails, productPriceStockController.updateProductStockDetails);
 
-// router.get('products/all/:shopId/:userId', authController.isSignedIn, authController.isCorrectUserIdPassed, productPriceStockController.getAllProducts);
+router.get('/products/all/:shopId/:userId', authController.isSignedIn, authController.isCorrectUserIdPassed, productPriceStockController.getAllProducts);
 // router.get('products/all/:categoryId/:shopId/:userId', authController.isSignedIn, authController.isCorrectUserIdPassed, productPriceStockController.getAllProductsForCategory);
 // router.get('/categories/all/:shopId/:userId', authController.isSignedIn, authController.isCorrectUserIdPassed, productPriceStockController.getAllCategories);
 

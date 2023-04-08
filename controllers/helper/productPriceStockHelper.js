@@ -18,7 +18,7 @@ function validateCreateProductVariantBodyRequestForShop(variantDetails) {
     return schema.validate(variantDetails, { allowUnknown: true });
 }
 
-function validateProductPriceAvailabilityBodyRequestForShop(stockDetails){
+function validateProductPriceAvailabilityBodyRequestForShop(stockDetails) {
     const schema = Joi.object({
         productVariantId: Joi.string().required().error(() => new Error('ProductVariantId is a required field')),
         productId: Joi.string().required().error(() => new Error('ProductId is a required field')),
@@ -32,7 +32,7 @@ function validateProductPriceAvailabilityBodyRequestForShop(stockDetails){
     return schema.validate(stockDetails, { allowUnknown: true });
 }
 
-function validateProductPriceStockUpdateBodyRequestForShop(stockDetails){
+function validateProductPriceStockUpdateBodyRequestForShop(stockDetails) {
     const schema = Joi.object({
         productVariantId: Joi.string().required().error(() => new Error('ProductVariantId is a required field')),
         productId: Joi.string().required().error(() => new Error('ProductId is a required field')),
@@ -41,7 +41,7 @@ function validateProductPriceStockUpdateBodyRequestForShop(stockDetails){
         productType: Joi.string().valid('food', 'grocery').required(() => new Error('ProductType can either be food or grocery and is a required field')),
         isProductEnable: Joi.boolean().required().error(() => new Error('IsProductEnable is a required field')),
         price: Joi.number().required().error(() => new Error('Price is required field')),
-        stock: Joi.number().required().error(() => Error('Stock of product is a required field'))
+        newStock: Joi.number().required().error(() => Error('newStock of product is a required field'))
     });
     return schema.validate(stockDetails, { allowUnknown: true });
 }

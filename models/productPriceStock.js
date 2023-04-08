@@ -14,7 +14,7 @@ const productPriceStockSchema = mongoose.Schema({
         required: true
     },
     categoryId: {
-        type: mongoose.Schema.Types.ObjectId, 
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'Category',
         required: true
     },
@@ -61,6 +61,20 @@ productPriceStockSchema
         } else {
             this._isProductAvailable = false;
             this.isProductAvailable = false;
+        }
+    })
+    .get(function () {
+        return this._isProductAvailable
+    });
+
+productPriceStockSchema
+    .virtual("newStock")
+    .set(function (newStock) {
+        if (this.productType == productType.GROCERY) {
+            this.stock = newStock;
+            this._stock = newStock;
+            this._isProductAvailable = newStock > 0;
+            this.isProductAvailable = newStock > 0;
         }
     })
     .get(function () {
