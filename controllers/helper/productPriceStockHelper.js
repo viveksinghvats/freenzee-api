@@ -46,9 +46,64 @@ function validateProductPriceStockUpdateBodyRequestForShop(stockDetails) {
     return schema.validate(stockDetails, { allowUnknown: true });
 }
 
+function convertShopStockToMenuItems(allProductsOfAShop) {
+    let groupedDetails = new Map();
+    let categoryProductIndexMap = new Map();
+    for (let i = 0; i < allProductsOfAShop.length; i++) {
+        const categoryId = allProductsOfAShop[i].categoryId._id;
+        const productId = allProductsOfAShop[i].productId._id;
+        if (!categoryProductIndexMap.has(allProductsOfAShop[i].categoryId._id)) {
+            let categoryObject = {
+                'categoryId': categoryId,
+                'categoryName': allProductsOfAShop[i].categoryId.name,
+                'images': allProductsOfAShop[i].categoryId.images,
+                'products': [
+                    {
+                        'productId': allProductsOfAShop[i].productId._id,
+                        'productName': allProductsOfAShop[i].productId.name,
+                        'productVariants': [
+                            {
+                                'productVariantId': allProductsOfAShop[i].productVariantId._id,
+                                'unit': allProductsOfAShop[i].productVariantId.unit,
+                            }
+                        ]
+                    }
+                ]
+            }
+            categoryProductIndexMap.set(categoryId, categoryObject);
+            groupedDetails.set(categoryId, { [productId]: 0 });
+        } else {
+            let group = groupedDetails.get(categoryId);
+            let groupValue = categoryProductIndexMap.get(categoryId);
+            if (group[productId] != null) {
+                groupValue['products'][group[productId]]['productVariants'].push({
+                    'productVariantId': allProductsOfAShop[i].productVariantId._id,
+                    'unit': allProductsOfAShop[i].productVariantId.unit,
+                });
+            } else {
+                groupValue['products'].push({
+                    'productId': allProductsOfAShop[i].productId._id,
+                    'productName': allProductsOfAShop[i].productId.name,
+                    'productVariants': [
+                        {
+                            'productVariantId': allProductsOfAShop[i].productVariantId._id,
+                            'unit': allProductsOfAShop[i].productVariantId.unit,
+                        }
+                    ]
+                });
+                group[productId] = Object.keys(group).length;
+            }
+            categoryProductIndexMap.set(categoryId, groupValue);
+            groupedDetails.set(categoryId, group);
+        }
+    }
+    return categoryProductIndexMap;
+}
+
 module.exports = {
     validateCreateProductBodyRequestForShop,
     validateCreateProductVariantBodyRequestForShop,
     validateProductPriceAvailabilityBodyRequestForShop,
-    validateProductPriceStockUpdateBodyRequestForShop
+    validateProductPriceStockUpdateBodyRequestForShop,
+    convertShopStockToMenuItems
 }

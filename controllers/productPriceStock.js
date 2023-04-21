@@ -1,7 +1,7 @@
 const { ProductPriceStock, Product, ProductVariant } = require("../models");
 const { productType } = require("../utils/constants");
 const httpConstants = require('../utils/httpConstants');
-const { validateCreateProductBodyRequestForShop, validateCreateProductVariantBodyRequestForShop, validateProductPriceAvailabilityBodyRequestForShop, validateProductPriceStockUpdateBodyRequestForShop } = require("./helper/productPriceStockHelper");
+const { validateCreateProductBodyRequestForShop, validateCreateProductVariantBodyRequestForShop, validateProductPriceAvailabilityBodyRequestForShop, validateProductPriceStockUpdateBodyRequestForShop, convertShopStockToMenuItems } = require("./helper/productPriceStockHelper");
 
 exports.isAuthenticatedToUpdateShopDetails = (req, res, next) => {
     if (req.profile.role != 'admin') {
@@ -247,33 +247,84 @@ exports.getAllProducts = async (req, res) => {
             isProductAvailable: true,
             shopId: req.shop.id
         }).populate('productVariantId').populate('productId').populate('categoryId').exec();
-        let groupedDetails = [];
-        let categoryProductIndexMap = new Map();
-        for(let i = 0; i < allProductsOfAShop.length; i++){
-            const temp = {};
-        //  if(categoryProductIndexMap.has(allProductsOfAShop[i].categoryId._id)){
-        //     const categoryId = allProductsOfAShop[i].categoryId._id;
-        //      let categoryObject = {
-        //         'categoryId': categoryId,
-        //         'categoryName': allProductsOfAShop[i].categoryId.name,
-        //         'products':[
-        //           {
-        //             'productId':allProductsOfAShop[i].productId._id,
-        //             'productName': allProductsOfAShop[i].productId.name,
-        //             'productVariant': [
-        //                 {
-        //                     'productVariantId':
-        //                     'unit': allProductsOfAShop[i].productVariantId.unit,
-
-        //                 }
-        //             ]
-        //           }
-        //         ]
-        //      }
-        //  }
-        }
-        res.status(httpConstants.OK_200).json({ allProductsOfAShop });
+        const categoryProductIndexMap = convertShopStockToMenuItems(allProductsOfAShop);
+        res.status(httpConstants.OK_200).json(Array.from(categoryProductIndexMap.values()));
     } catch (error) {
-        console.log(err);
+        console.log(error);
+    }
+}
+
+exports.getAllCategories = async (req, res) => {
+    try {
+        const allProductsOfAShop = await ProductPriceStock.find({
+            isProductAvailable: true,
+            shopId: req.shop.id
+        }).populate('productVariantId').populate('productId').populate('categoryId').exec();
+        const categoryProductIndexMap = convertShopStockToMenuItems(allProductsOfAShop);
+        const menuArr = Array.from(categoryProductIndexMap.values());
+        let allCategories = [];
+        for (let i = 0; i < menuArr.length; i++) {
+            allCategories.push({
+                'categoryId': menuArr[i].categoryId,
+                'categoryName': menuArr[i].categoryName,
+                'images': menuArr[i].images
+            });
+        }
+        res.status(httpConstants.OK_200).json(Array.from(allCategories));
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+exports.getAllProductsOfCategory = async (req, res) => {
+    try {
+        const allProductsOfAShop = await ProductPriceStock.find({
+            isProductAvailable: true,
+            shopId: req.shop.id,
+            categoryId: req.category.id
+        }).populate('productVariantId').populate('productId').populate('categoryId').exec();
+        if (allProductsOfAShop.length > 0) {
+            const categoryProductIndexMap = convertShopStockToMenuItems(allProductsOfAShop);
+            res.status(httpConstants.OK_200).json(Array.from(categoryProductIndexMap.values())[0]);
+        } else {
+            res.status(httpConstants.OK_200).json({
+                message: 'No product found'
+            });
+        }
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+exports.getProductDetails = async (req, res) => {
+    try {
+        const allProductsOfAShop = await ProductPriceStock.find({
+            isProductAvailable: true,
+            shopId: req.shop.id,
+            productId: req.product.id
+        }).populate('productVariantId').populate('productId').exec();
+        let product = {};
+        for(let i = 0; i < allProductsOfAShop.length; i++){
+            if(i == 0){
+                product =  {
+                    'productId': allProductsOfAShop[i].productId._id,
+                    'productName': allProductsOfAShop[i].productId.name,
+                    'productVariants': [
+                        {
+                            'productVariantId': allProductsOfAShop[i].productVariantId._id,
+                            'unit': allProductsOfAShop[i].productVariantId.unit,
+                        }
+                    ]
+                }
+            } else{
+                product['productVariants'].push({
+                    'productVariantId': allProductsOfAShop[i].productVariantId._id,
+                    'unit': allProductsOfAShop[i].productVariantId.unit,
+                });
+            }
+        }
+        res.status(httpConstants.OK_200).json(product);
+    } catch (error) {
+        
     }
 }
