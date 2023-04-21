@@ -304,27 +304,32 @@ exports.getProductDetails = async (req, res) => {
             productId: req.product.id
         }).populate('productVariantId').populate('productId').exec();
         let product = {};
-        for(let i = 0; i < allProductsOfAShop.length; i++){
-            if(i == 0){
-                product =  {
+        for (let i = 0; i < allProductsOfAShop.length; i++) {
+            if (i == 0) {
+                product = {
                     'productId': allProductsOfAShop[i].productId._id,
                     'productName': allProductsOfAShop[i].productId.name,
+                    'images': allProductsOfAShop[i].productId.images,
                     'productVariants': [
                         {
                             'productVariantId': allProductsOfAShop[i].productVariantId._id,
                             'unit': allProductsOfAShop[i].productVariantId.unit,
+                            'images': allProductsOfAShop[i].productVariantId.images,
+                            'price': allProductsOfAShop[i].price
                         }
                     ]
                 }
-            } else{
+            } else {
                 product['productVariants'].push({
                     'productVariantId': allProductsOfAShop[i].productVariantId._id,
                     'unit': allProductsOfAShop[i].productVariantId.unit,
+                    'images': allProductsOfAShop[i].productVariantId.images,
+                    'price': allProductsOfAShop[i].price 
                 });
             }
         }
         res.status(httpConstants.OK_200).json(product);
     } catch (error) {
-        
+
     }
 }
