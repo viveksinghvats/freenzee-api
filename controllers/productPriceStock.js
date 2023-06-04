@@ -105,7 +105,7 @@ exports.createNewProductVariantForShop = (req, res) => {
             res.status(httpConstants.OK_200).json({ productVariant });
         });
     } catch (error) {
-        console.log(err);
+        console.log(error);
     }
 }
 
