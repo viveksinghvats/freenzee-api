@@ -28,7 +28,12 @@ const cartSchema = new mongoose.Schema({
   slotsProducts: [
     {
       slotValue: {
-        type: String
+        type: String,
+        required: true
+      },
+      date: {
+        type: String,
+        required: true
       },
       products: [
         {

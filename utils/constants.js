@@ -3,4 +3,12 @@ const productType = {
     GROCERY: 'grocery'
 }
 
-exports.productType = productType;
+const clockValue = {
+    AM: 'AM',
+    PM: 'PM'
+}
+
+module.exports = {
+    productType,
+    clockValue
+}

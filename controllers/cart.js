@@ -1,7 +1,6 @@
 const moment = require('moment/moment');
 const { Cart, ProductPriceStock } = require('../models');
-const { productType } = require('../utils/constants');
-const httpConstants = require('../utils/httpConstants');
+const { constants, httpConstants } = require('../utils');
 const { validateAddProductToCart } = require('./helper/cartHelper');
 
 exports.updateProductToCart = async (req, res) => {
@@ -30,41 +29,54 @@ exports.updateProductToCart = async (req, res) => {
                 shopId: req.body.shopId
             });
             if (!productStock) {
-                return res.status(httpConstants.BAD_REQUEST_400).json({error: 'Invalid productVariantId passed'});
-            } else{
-                if(productStock.productType == productType.FOOD && !productStock.isProductAvailable){
-                    return res.status(httpConstants.BAD_REQUEST_400).json({error: 'Product is no longer available'}); 
-                } else if(productStock.productType == productType.GROCERY && (!(productStock.stock > 0) || !productStock.isProductAvailable)){
-                    return res.status(httpConstants.BAD_REQUEST_400).json({error: 'Product is out of stock'});
+                return res.status(httpConstants.BAD_REQUEST_400).json({ error: 'Invalid productVariantId passed' });
+            } else {
+                if (productStock.productType == constants.productType.FOOD && !productStock.isProductAvailable) {
+                    return res.status(httpConstants.BAD_REQUEST_400).json({ error: 'Product is no longer available' });
+                } else if (productStock.productType == constants.productType.GROCERY && (!(productStock.stock > 0) || !productStock.isProductAvailable)) {
+                    return res.status(httpConstants.BAD_REQUEST_400).json({ error: 'Product is out of stock' });
                 }
-                if(req.body.isQuickDelivery){
+                if (req.body.isQuickDelivery) {
                     req.body.quickDeliveryProducts = [
                         {
                             productVariantId: req.body.productVariantId,
-                            quantity: 1 
+                            quantity: 1
                         }
                     ]
                     req.body.slotProducts = [];
-                } else{
-                    if(!req.body.slotValue){
+                } else {
+                    if (!req.body.slotValue) {
                         res.status(httpConstants.BAD_REQUEST_400).json({
                             error: 'Slot value cannot be empty if not quick delivery'
                         });
                     }
-                    try {
-                        let time = Number(req.body.slotValue.slice(0,1));
-                        let clock = req.body.slotValue.slice(1,3);
-
-                        let dateCheck = moment(req.body.date).format('DD/MM/YYYY');
-                        const error = 1; 
-                    } catch (error) {
-                        res.status(httpConstants.BAD_REQUEST_400).json({
-                            error: 'dd-mm-yyyy date format is supported only'
+                    let dateCheck = moment(req.body.date, 'DD/MM/YYYY');
+                    if (!dateCheck.isValid()) {
+                        return res.status(httpConstants.BAD_REQUEST_400).json({
+                            error: 'DD/MM/YYYY date format is supported only'
                         });
+                    }
+                    if (isValidSlot(req.body.slotValue, req.body.date, 10)) // TODO: reserve time needs to be configurable
+                    {
+                       req.body.slotsProducts = [
+                        {
+                            slotValue: req.body.slotValue,
+                            date:  req.body.date,
+                            products: [
+                                {
+                                    productVariantId: req.body.productVariantId,
+                                    quantity: 1
+                                }
+                            ]
+                        }
+                       ]
+                       req.body.quickDeliveryProducts = [];
+                    } else {
+                       return res.status(httpConstants.BAD_REQUEST_400).json({ message: 'Slot no longer available to book' });
                     }
                 }
             }
-            let userCart = Cart(req.body); 
+            let userCart = Cart(req.body);
             userCart.save((error, userCart) => {
                 if (error) {
                     return res.status(httpConstants.BAD_REQUEST_400).json({
@@ -77,4 +89,15 @@ exports.updateProductToCart = async (req, res) => {
     } catch (error) {
         console.log(error);
     }
+}
+
+function isValidSlot(slotValue, date, reserveTime) {
+    let time = Number(slotValue.slice(0, 1));
+    let clock = slotValue.slice(1, 3);
+    const slotDate = moment(date, 'DD/MM/YYYY').startOf('day').add(clock === constants.clockValue.AM ? time : (12 + time), 'hours');
+    if (moment().add(reserveTime, 'minutes') < slotDate) {
+        return true;
+    }
+    else return false;
+
 }
