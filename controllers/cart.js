@@ -90,56 +90,95 @@ exports.updateProductToCart = async (req, res) => {
                     if (!productStock) {
                         return res.status(httpConstants.BAD_REQUEST_400).json({ error: 'Invalid productVariantId passed' });
                     }
-                    checkProductAvailbility(productStock);
+                    if (req.body.isAdd) {
+                        checkProductAvailbility(productStock);
+                    }
                     let slotValues = userCart.slotsProducts;
                     if (slotValues.length > 0) {
                         let isSlotFound = false;
                         for (let i = 0; i < slotValues.length; i++) {
-                            if (slotValues[i].date === req.body.date && slotValues[i].slotValue === req.body.slotValue) {
+                            if (slotValues[i].date == req.body.date && slotValues[i].slotValue == req.body.slotValue) {
                                 isSlotFound = true;
                                 let isProductExists = false;
                                 for (let j = 0; j < slotValues[i].products.length; j++) {
-                                    if (slotValues[i].products[j].productVariantId === req.body.productVariantId) {
+                                    if (slotValues[i].products[j].productVariantId == req.body.productVariantId) {
                                         isProductExists = true;
-                                        slotValues[i].products[j].quantity += 1;
-                                        if (productStock.productType === constants.productType.GROCERY) {
-                                            if (productStock.stock < slotValues[i].products[j].quantity) {
-                                                return res.status(httpConstants.BAD_REQUEST_400).json({ error: `Only ${productStock.stock} available in stock` });
+                                        if (req.body.isAdd) {
+                                            slotValues[i].products[j].quantity += 1;
+                                            if (productStock.productType == constants.productType.GROCERY) {
+                                                if (productStock.stock < slotValues[i].products[j].quantity) {
+                                                    return res.status(httpConstants.BAD_REQUEST_400).json({ error: `Only ${productStock.stock} available in stock` });
+                                                }
+                                            }
+                                        } else {
+                                            if (slotValues[i].products[j].quantity > 1) {
+                                                slotValues[i].products[j].quantity -= 1;
+                                            } else {
+                                                slotValues[i].products[j] = null;
                                             }
                                         }
                                         break;
                                     }
                                 }
-                                if (!isProductExists) {
-                                    slotValues[i].products.push({
+                                let products = [];
+                                for(let j = 0; j < slotValues[i].products.length; j++){
+                                  if(slotValues[i].products[j] != null){
+                                    products.push(slotValues[i].products[j]);
+                                  }
+                                }
+                                if(products.length > 0){
+                                    slotValues[i].products = products;
+                                    if (!isProductExists) {
+                                    if(req.body.isAdd){
+                                        slotValues[i].products.push({
                                         productVariantId: req.body.productVariantId,
                                         quantity: 1
-                                    })
+                                    });
+                                    } else{
+                                         return res.status(httpConstants.BAD_REQUEST_400).json({ message: `Cannot remove a product if it's not there` });
+                                    }
+                                }
+                                } else{
+                                    slotValues[i] = null;
                                 }
                                 break;
                             }
                         }
                         if (!isSlotFound) {
-                            slotValues.push({
+                            if(req.body.isAdd){
+                                slotValues.push({
                                 slotValue: req.body.slotValue,
                                 date: req.body.date,
                                 products: [{
-                                    productVariantId: req.productVariantId,
+                                    productVariantId: req.body.productVariantId,
                                     quantity: 1
                                 }]
                             });
+                            } else{
+                                 return res.status(httpConstants.BAD_REQUEST_400).json({ message: `Cannot remove a product if it's not there` });
+                            }
                         }
                     } else {
-                        slotValues = [{
+                        if(req.body.isAdd){
+                            slotValues = [{
                             slotValue: req.body.slotValue,
                             date: req.body.date,
                             products: [{
-                                productVariantId: req.productVariantId,
+                                productVariantId: req.body.productVariantId,
                                 quantity: 1
                             }]
                         }];
+                        } else{
+                            return res.status(httpConstants.BAD_REQUEST_400).json({ message: `Cannot remove a product if it's not there` });
+                        }
                     }
-                    userCart.slotsProducts = slotValues;
+                    let slotData = [];
+                    for(let j = 0; j < slotValues.length; j++){
+                        if(slotValues[j] != null){
+                            slotData.push(slotValues[j]);
+                        }
+                    }
+                    userCart.slotsProducts = slotData;
                 } else {
                     return res.status(httpConstants.BAD_REQUEST_400).json({ message: 'Slot no longer available to book' });
                 }
@@ -153,34 +192,62 @@ exports.updateProductToCart = async (req, res) => {
                 if (quickDeliveryProducts.length > 0) {
                     let isProductExists = false;
                     for (let i = 0; i < quickDeliveryProducts.length; i++) {
-                        if (quickDeliveryProducts[i].productVariantId === req.body.productVariantId) {
+                        if (quickDeliveryProducts[i].productVariantId == req.body.productVariantId) {
                             isProductExists = true;
-                            quickDeliveryProducts[i].quantity += 1;
-                            if (productStock.productType === constants.productType.GROCERY) {
-                                if (productStock.stock < quickDeliveryProducts[i].quantity) {
-                                    return res.status(httpConstants.BAD_REQUEST_400).json({ error: `Only ${productStock.stock} available in stock` });
+                            if(req.body.isAdd){
+                                quickDeliveryProducts[i].quantity += 1;
+                                if (productStock.productType == constants.productType.GROCERY) {
+                                    if (productStock.stock < quickDeliveryProducts[i].quantity) {
+                                        return res.status(httpConstants.BAD_REQUEST_400).json({ error: `Only ${productStock.stock} available in stock` });
+                                    }
+                                }
+                            } else{
+                                if(quickDeliveryProducts[i].quantity > 1){
+                                    quickDeliveryProducts[i].quantity -= 1; 
+                                } else{
+                                    quickDeliveryProducts[i] = null;
                                 }
                             }
                             break;
                         }
                     }
                     if (!isProductExists) {
-                        quickDeliveryProducts.push({
-                            productVariantId: req.body.productVariantId,
-                            quantity: 1
-                        })
+                        if(req.body.isAdd){
+                            quickDeliveryProducts.push({
+                                productVariantId: req.body.productVariantId,
+                                quantity: 1
+                            });
+                        } else{
+                            return res.status(httpConstants.BAD_REQUEST_400).json({ message: `Cannot remove a product if it's not there` });
+                        }
                     }
                 } else {
-                    quickDeliveryProducts = [{
-                        productVariantId: req.body.productVariantId,
-                        quantity: 1
-                    }];
+                    if(req.body.isAdd){
+                        quickDeliveryProducts = [{
+                            productVariantId: req.body.productVariantId,
+                            quantity: 1
+                        }];
+                    } else{
+                        return res.status(httpConstants.BAD_REQUEST_400).json({ message: `Cannot remove a product if it's not there` });
+                    }
                 }
-                userCart.quickDeliveryProducts = quickDeliveryProducts;
+                let temp = [];
+                for(let i = 0; i < quickDeliveryProducts.length; i++){
+                    if(quickDeliveryProducts[i] != null){
+                        temp.push(quickDeliveryProducts[i]);
+                    }
+                }
+                userCart.quickDeliveryProducts = temp;
             }
+            userCart.save((error, userCart) => {
+                if (error) {
+                    return res.status(httpConstants.BAD_REQUEST_400).json({
+                        error: 'Not able to update userCart'
+                    })
+                }
+                return res.status(httpConstants.OK_200).json({ userCart });
+            });
         }
-        await userCart.save();
-        return res.status(httpConstants.OK_200).json({ userCart });
     } catch (error) {
         console.log(error);
     }
@@ -195,9 +262,9 @@ async function findProductVariantDetails(productVariantId, shopId) {
 }
 
 function checkProductAvailbility(productStock) {
-    if (productStock.productType === constants.productType.FOOD && !productStock.isProductAvailable) {
+    if (productStock.productType == constants.productType.FOOD && !productStock.isProductAvailable) {
         return res.status(httpConstants.BAD_REQUEST_400).json({ error: 'Product is no longer available' });
-    } else if (productStock.productType === constants.productType.GROCERY && (!(productStock.stock > 0) || !productStock.isProductAvailable)) {
+    } else if (productStock.productType == constants.productType.GROCERY && (!(productStock.stock > 0) || !productStock.isProductAvailable)) {
         return res.status(httpConstants.BAD_REQUEST_400).json({ error: 'Product is out of stock' });
     }
 }
