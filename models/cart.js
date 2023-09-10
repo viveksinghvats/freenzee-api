@@ -6,11 +6,6 @@ const cartSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
-  shopId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Shop',
-    required: true
-  },
   quickDeliveryProducts: [
     {
       productVariantId: {
