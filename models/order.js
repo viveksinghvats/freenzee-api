@@ -1,10 +1,11 @@
 const mongoose = require("mongoose");
+const { orderStatusType } = require("../utils/constants");
 // Order Schema
 const orderSchema = new mongoose.Schema({
   products: [{
-    product: {
+    productVariantId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Product',
+      ref: 'ProductVariant',
       required: true
     },
     quantity: {
@@ -12,15 +13,41 @@ const orderSchema = new mongoose.Schema({
       required: true
     }
   }],
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  },
   total: {
     type: Number,
     required: true
-  }
-},  { timestamps: true });
+  },
+  orderStatus: {
+    type: String,
+    enum: [orderStatusType.PENDING, orderStatusType.PACKED, orderStatusType.IN_TRANSIT, orderStatusType.DELIVERED, orderStatusType.CANCELLED],
+    default: orderStatusType.PENDING
+  },
+  isQuick: {
+    type: Boolean,
+    default: true
+  },
+  slotValue: {
+    type: String,
+    required: false
+  },
+  transcationId: {
+    type: String,
+    required: false
+  },
+  deliveryTime: {
+    type: Date,
+    required: false,
+  },
+  cancellationTime: {
+    type: Date,
+    required: false,
+  },
+  deliveredBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: false
+  },
+
+}, { timestamps: true });
 
 module.exports = mongoose.model('Order', orderSchema);

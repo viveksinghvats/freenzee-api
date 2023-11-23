@@ -8,9 +8,19 @@ const clockValue = {
     PM: 'PM'
 }
 
+const orderStatusType = {
+    PENDING: 'Pending',
+    PACKED: 'Packed',
+    IN_TRANSIT: 'In-Transit',
+    DELIVERED: 'Delivered',
+    CANCELLED: 'Cancelled'
+}
+
+
 module.exports = {
     productType,
-    clockValue
+    clockValue,
+    orderStatusType
 }
 
 class PriorityQueue {
