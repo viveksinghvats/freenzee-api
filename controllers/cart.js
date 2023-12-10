@@ -1,7 +1,7 @@
 const moment = require('moment/moment');
 const { Cart, ProductPriceStock, ProductVariant } = require('../models');
 const { constants, httpConstants } = require('../utils');
-const { validateAddProductToCart } = require('./helper/cartHelper');
+const { validateAddProductToCart, isValidSlot, checkProductAvailbility } = require('./helper/cartHelper');
 const { PriorityQueue, productType } = require('../utils/constants');
 const productVariant = require('../models/productVariant');
 
@@ -461,7 +461,7 @@ exports.getUserCart = async (req, res) => {
                             productVariantId: productStockDetails.productVariantId,
                             addedQuantity: currentQuantity,
                             allAddedQuantities: totalQuantityAdded,
-                            isFood: true,
+                            productType: productType.FOOD,
                             availableStock: 0,
                             unitPrice: productStockDetails.price,
                             itemTotal: itemTotal,
@@ -475,7 +475,7 @@ exports.getUserCart = async (req, res) => {
                                 productVariantId: productStockDetails.productVariantId,
                                 addedQuantity: currentQuantity,
                                 allAddedQuantities: totalQuantityAdded,
-                                isFood: false,
+                                productType: productType.GROCERY,
                                 availableStock: productStockDetails.stock,
                                 unitPrice: productStockDetails.price,
                                 itemTotal: itemTotal,
@@ -486,7 +486,7 @@ exports.getUserCart = async (req, res) => {
                                 productVariantId: productStockDetails.productVariantId,
                                 addedQuantity: currentQuantity,
                                 allAddedQuantities: totalQuantityAdded,
-                                isFood: false,
+                                productType: productType.GROCERY,
                                 availableStock: productStockDetails.stock,
                                 productDetails: productStockDetails.productVariantId
                             });
@@ -526,7 +526,7 @@ exports.getUserCart = async (req, res) => {
                                 productVariantId: productStockDetails.productVariantId,
                                 addedQuantity: currentQuantity,
                                 allAddedQuantities: totalQuantityAdded,
-                                isFood: true,
+                                productType: productType.FOOD,
                                 availableStock: 0,
                                 unitPrice: productStockDetails.price,
                                 itemTotal: itemTotal,
@@ -540,7 +540,7 @@ exports.getUserCart = async (req, res) => {
                                     productVariantId: productStockDetails.productVariantId,
                                     addedQuantity: currentQuantity,
                                     allAddedQuantities: totalQuantityAdded,
-                                    isFood: false,
+                                    productType: productType.GROCERY,
                                     availableStock: productStockDetails.stock,
                                     unitPrice: productStockDetails.price,
                                     itemTotal: itemTotal,
@@ -551,7 +551,7 @@ exports.getUserCart = async (req, res) => {
                                     productVariantId: productStockDetails.productVariantId,
                                     addedQuantity: currentQuantity,
                                     allAddedQuantities: totalQuantityAdded,
-                                    isFood: false,
+                                    productType: productType.GROCERY,
                                     availableStock: productStockDetails.stock,
                                     productDetails: productStockDetails.productVariantId
                                 });
@@ -581,43 +581,9 @@ async function findProductVariantDetails(productVariantId, shopId) {
     return product;
 }
 
-function checkProductAvailbility(productStock) {
-    let message;
-    let status = true;
-    if (productStock.productType == constants.productType.FOOD && !productStock.isProductAvailable) {
-        message = 'Product is no longer available';
-        status = false;
-    } else if (productStock.productType == constants.productType.GROCERY && (!(productStock.stock > 0) || !productStock.isProductAvailable)) {
-        message = 'Product is out of stock';
-        status = false;
-    }
-    return {
-        status: status,
-        message: message
-    }
-}
-
 function convertSlotValueToDate(date, slotValue) {
     let is2Digits = slotValue.length == 4;
     let time = is2Digits ? Number(slotValue.slice(0, 2)) : Number(slotValue.slice(0, 1));
     let clock = is2Digits ? slotValue.slice(2, 4) : slotValue.slice(1, 3);
     return moment(date, 'DD/MM/YYYY').startOf('day').add(clock === constants.clockValue.AM ? time : (12 + time), 'hours');
-}
-
-function isValidSlot(slotValue, date, reserveTime, futureSlotDays) {
-    try {
-        if (moment(date, 'DD/MM/YYYY') > moment(new Date()).add(futureSlotDays, 'days')) {
-            return false;
-        }
-        let is2Digits = slotValue.length == 4;
-        let time = is2Digits ? Number(slotValue.slice(0, 2)) : Number(slotValue.slice(0, 1));
-        let clock = is2Digits ? slotValue.slice(2, 4) : slotValue.slice(1, 3);
-        const slotDate = moment(date, 'DD/MM/YYYY').startOf('day').add(clock === constants.clockValue.AM ? time : (12 + time), 'hours');
-        if (moment().add(reserveTime, 'minutes') < slotDate) {
-            return true;
-        }
-        else return false;
-    } catch (error) {
-        return false;
-    }
 }

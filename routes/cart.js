@@ -1,8 +1,7 @@
 var express = require("express");
-const { authController, userController, productController, cartController, shopController } = require("../controllers/index");
+const { authController, userController, cartController, shopController } = require("../controllers/index");
 var router = express.Router();
 
-router.param('productVariantId', productController.getProductVariantById);
 router.param('userId', userController.getUserById);
 router.param('shopId', shopController.getShopById);
 

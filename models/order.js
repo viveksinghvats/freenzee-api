@@ -13,6 +13,11 @@ const orderSchema = new mongoose.Schema({
       required: true
     }
   }],
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
   total: {
     type: Number,
     required: true
@@ -32,7 +37,7 @@ const orderSchema = new mongoose.Schema({
   },
   transcationId: {
     type: String,
-    required: false
+    required: true
   },
   deliveryTime: {
     type: Date,
