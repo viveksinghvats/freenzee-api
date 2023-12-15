@@ -94,7 +94,7 @@ exports.updateProductToCart = async (req, res) => {
             });
         } else {
             let productQuantityMap = {};
-            if (userCart.quickDeliveryProducts.length > 0) {
+            if (userCart.quickDeliveryProducts && userCart.quickDeliveryProducts.length > 0) {
                 const quickProducts = userCart.quickDeliveryProducts;
                 for (let i = 0; i < quickProducts.length; i++) {
                     productQuantityMap[quickProducts[i].productVariantId] = {
@@ -106,7 +106,7 @@ exports.updateProductToCart = async (req, res) => {
                 }
             }
             let slotProducts = new PriorityQueue();
-            if (userCart.slotsProducts.length > 0) {
+            if (userCart.slotsProducts && userCart.slotsProducts.length > 0) {
                 for (let i = 0; i < userCart.slotsProducts.length; i++) {
                     if (userCart.slotsProducts[i].products.length > 0) {
                         if (isValidSlot(userCart.slotsProducts[i].slotValue, userCart.slotsProducts[i].date, reserveTime, futureSlotDays)) {
@@ -382,7 +382,7 @@ exports.getUserCart = async (req, res) => {
         const reserveTime = 10;  // TODO: reserve time needs to be configurable
         const futureSlotDays = 1;
         let productQuantityMap = {};
-        if (userCart.quickDeliveryProducts.length > 0) {
+        if (userCart.quickDeliveryProducts && userCart.quickDeliveryProducts.length > 0) {
             const quickProducts = userCart.quickDeliveryProducts;
             for (let i = 0; i < quickProducts.length; i++) {
                 productQuantityMap[quickProducts[i].productVariantId] = {
@@ -395,7 +395,7 @@ exports.getUserCart = async (req, res) => {
         }
 
         let slotProducts = new PriorityQueue();
-        if (userCart.slotsProducts.length > 0) {
+        if (userCart.slotsProducts && userCart.slotsProducts.length > 0) {
             for (let i = 0; i < userCart.slotsProducts.length; i++) {
                 if (userCart.slotsProducts[i].products.length > 0) {
                     if (isValidSlot(userCart.slotsProducts[i].slotValue, userCart.slotsProducts[i].date, reserveTime, futureSlotDays)) {
