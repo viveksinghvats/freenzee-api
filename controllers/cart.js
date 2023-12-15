@@ -262,7 +262,7 @@ exports.updateProductToCart = async (req, res) => {
                     }
                 }
                 let quickDeliveryProducts = userCart.quickDeliveryProducts;
-                if (quickDeliveryProducts.length > 0) {
+                if (quickDeliveryProducts && quickDeliveryProducts.length > 0) {
                     let isProductExists = false;
                     for (let i = 0; i < quickDeliveryProducts.length; i++) {
                         if (quickDeliveryProducts[i].productVariantId == req.body.productVariantId) {
