@@ -132,7 +132,7 @@ exports.verifyOrder = async (req, res) => {
                 let userCart = await Cart.findOne({ userId: req.profile.id }).exec();
                 if (cartClearObject) {
                     if (cartClearObject.isQuick) {
-                        userCart.quickDeliveryProducts = null;
+                        userCart.quickDeliveryProducts = [];
                     }
                     if (cartClearObject.slots && cartClearObject.slots.length > 0) {
                         const slotValueMap = cartClearObject.slots.reduce((acc, current) => {

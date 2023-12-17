@@ -465,7 +465,6 @@ exports.getUserCart = async (req, res) => {
                             availableStock: 0,
                             unitPrice: productStockDetails.price,
                             itemTotal: itemTotal,
-                            productDetails: productStockDetails.productVariantId
                         });
                     } else if (productStockDetails.productType === productType.GROCERY) {
                         if (totalQuantityAdded <= productStockDetails.stock) {
@@ -479,7 +478,7 @@ exports.getUserCart = async (req, res) => {
                                 availableStock: productStockDetails.stock,
                                 unitPrice: productStockDetails.price,
                                 itemTotal: itemTotal,
-                                productDetails: productStockDetails.productVariantId
+
                             });
                         } else {
                             result.quickDelivery.needAttentionProducts.push({
@@ -488,14 +487,13 @@ exports.getUserCart = async (req, res) => {
                                 allAddedQuantities: totalQuantityAdded,
                                 productType: productType.GROCERY,
                                 availableStock: productStockDetails.stock,
-                                productDetails: productStockDetails.productVariantId
+                                unitPrice: productStockDetails.price
                             });
                         }
                     }
                 } else if (productStockDetails) {
                     result.quickDelivery.outOfStockProducts.push({
-                        productVariantId: productStockDetails.productVariantId,
-                        productDetails: productStockDetails.productVariantId
+                        productVariantId: productStockDetails.productVariantId
                     });
                 }
             }
@@ -530,7 +528,7 @@ exports.getUserCart = async (req, res) => {
                                 availableStock: 0,
                                 unitPrice: productStockDetails.price,
                                 itemTotal: itemTotal,
-                                productDetails: productStockDetails.productVariantId
+
                             });
                         } else if (productStockDetails.productType === productType.GROCERY) {
                             if (totalQuantityAdded <= productStockDetails.stock) {
@@ -544,7 +542,7 @@ exports.getUserCart = async (req, res) => {
                                     availableStock: productStockDetails.stock,
                                     unitPrice: productStockDetails.price,
                                     itemTotal: itemTotal,
-                                    productDetails: productStockDetails.productVariantId
+
                                 });
                             } else {
                                 slotResult.needAttentionProducts.push({
@@ -553,14 +551,13 @@ exports.getUserCart = async (req, res) => {
                                     allAddedQuantities: totalQuantityAdded,
                                     productType: productType.GROCERY,
                                     availableStock: productStockDetails.stock,
-                                    productDetails: productStockDetails.productVariantId
+                                    unitPrice: productStockDetails.price
                                 });
                             }
                         }
                     } else if (productStockDetails) {
                         slotResult.outOfStockProducts.push({
                             productVariantId: productStockDetails.productVariantId,
-                            productDetails: productStockDetails.productVariantId
                         });
                     }
                 }
