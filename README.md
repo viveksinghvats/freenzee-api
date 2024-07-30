@@ -20,3 +20,18 @@ Frenzee is an inventory-based e-commerce application designed to streamline the 
    ```sh
    git clone https://github.com/viveksinghvats/freenzee-api.git
    cd frenzee-api
+
+2. **Install dependencies**:
+   ```sh
+   npm install
+   
+3. **Set up environment variables**:
+   Create a .env file in the root directory and add your MongoDB connection string and other necessary environment variables.
+   ```sh
+   DATABASE=your_mongodb_uri
+   SECRET=your secret
+   
+4. **Start the application**:
+   ```sh
+   npm start
+   
